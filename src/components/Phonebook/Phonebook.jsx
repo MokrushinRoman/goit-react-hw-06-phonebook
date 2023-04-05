@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { BiXCircle } from 'react-icons/bi';
-import PropTypes from 'prop-types';
-
 import { errorNotification } from 'helpers';
-
+import { useDispatch, useSelector } from 'react-redux';
 import {
   PhonebookForm,
   Label,
@@ -12,10 +10,13 @@ import {
   CloseButton,
 } from './Phonebook.styled';
 import { Box } from 'components/Box';
+import { addContact, getContacts } from 'reduxFiles';
 
-export const Phonebook = ({ addContact, existedContacts }) => {
+export const Phonebook = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const dispatch = useDispatch();
+  const existedContacts = useSelector(getContacts);
 
   const onInputChange = e => {
     const { name, value } = e.currentTarget;
@@ -30,7 +31,6 @@ export const Phonebook = ({ addContact, existedContacts }) => {
       default:
         return new Error("Such field wasn't found ");
     }
-    // setState({ [name]: value });
   };
 
   const onClearInput = e => {
@@ -47,7 +47,6 @@ export const Phonebook = ({ addContact, existedContacts }) => {
       default:
         return new Error("Such field wasn't found ");
     }
-    // setState({ [name]: '' });
   };
 
   const onSubmit = e => {
@@ -56,21 +55,19 @@ export const Phonebook = ({ addContact, existedContacts }) => {
     if (dublicateFinder(name)) {
       errorNotification(name);
     } else {
-      addContact(name, number);
+      dispatch(addContact(name, number));
       formReset();
     }
   };
 
-  const dublicateFinder = newName => {
-    return existedContacts.some(
-      ({ name }) => name.toLowerCase() === newName.toLowerCase()
-    );
+  const dublicateFinder = name => {
+    const newName = name.toLowerCase();
+    return existedContacts.some(({ name }) => name.toLowerCase() === newName);
   };
 
   const formReset = () => {
     setName('');
     setNumber('');
-    // this.setState({ name: '', number: '' });
   };
 
   return (
@@ -116,15 +113,4 @@ export const Phonebook = ({ addContact, existedContacts }) => {
       <AddContactButton type="submit">Add contacts</AddContactButton>
     </PhonebookForm>
   );
-};
-
-Phonebook.propTypes = {
-  existedContacts: PropTypes.arrayOf(
-    PropTypes.exact({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      number: PropTypes.string,
-    }).isRequired
-  ).isRequired,
-  addContact: PropTypes.func.isRequired,
 };
